@@ -1,4 +1,4 @@
-const faker = require('./faker.js');
+const faker = require('faker');
 const Gen = require('sentence-generator');
 
 const text = Gen('./content.txt');
@@ -35,10 +35,13 @@ function createVideoList(n) {
 
     eachVideo.videoId = videoId;
     eachVideo.title = title;
-    eachVideo.publisher = faker.Name.findName();
+    eachVideo.publisher = faker.name.findName();
     eachVideo.categories = categories[randomIndex];
-    eachVideo.likes = faker.random.number(10000000);
+    eachVideo.views = faker.random.number(5000000);
+    eachVideo.likes = faker.random.number(50000);
+    eachVideo.dislikes = faker.random.number(10000);
     eachVideo.recommended = false;
+    eachVideo.actions = {};
 
     videoList.push(eachVideo);
   }
@@ -47,4 +50,4 @@ function createVideoList(n) {
 
 console.log('videoList', createVideoList(5));
 
-
+module.exports = createVideoList;

@@ -1,15 +1,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var elasticsearch = require('elasticsearch');
+var ESclient = require('../elasticsearch/elasticsearch.js');
 var app = express();
 
-var log = console.log.bind(console);
-
-// Connect to localhost:9200 and use the default settings
-var client = new elasticsearch.Client({
-  host: 'localhost:9200',
-  log: 'trace'
-});
 
 
 // app.use(bodyParser.json()); // for parsing application/json
@@ -17,15 +10,16 @@ var client = new elasticsearch.Client({
 
 app.get('/', function(req, res){
 
-  client.cluster.health(function (err, resp) {
+  ESclient.cluster.health(function (err, resp) {
     if (err) {
       console.error(err.message);
     } else {
       console.dir(resp);
+      res.json(resp)
     }
   });
 
-  res.send('hello')
+  
 });
 
 //REST API Format : http://host:port/[index]/[type]/[_action/id]
@@ -39,11 +33,11 @@ app.post('/videos', (req, res) => {
   console.log('req body', req.body);
 
   
-  // client.indices.delete({
+  // ESclient.indices.delete({
   //   index: 'videos-list',
   // });
 
-  client.indices.create({
+  ESclient.indices.create({
     index: 'videos-list',
     type: 'videos',
     mapping: {
@@ -54,22 +48,17 @@ app.post('/videos', (req, res) => {
   })
 
 
-  client.index({
+  ESclient.index({
     index: 'videos-list',
     type: 'videos',
+    id: '1',
     body: {
-      name: 'Julie'
+      name: 'james'
     }
   });
   res.send('post /videos response')
 })
 
-// function search() {
-//   return client.search({
-//     index: 'test',
-//     q: 'huhu'
-//   }).then(log);
-// }
 
 // client.search({
 //   q: 'pants'
@@ -81,22 +70,38 @@ app.post('/videos', (req, res) => {
 //index and type
 // index type id body {name, content, date}
 
+// client.search({
+//   index: 'example_index',
+//   type: 'posts',
+//   body: {
+//     query: {
+//       match: {
+//         body: 'Hello World'
+//       }
+//     }
+//   }
+// });
+
 app.get('/videos', (req, res) => {
-  client.search({
+  ESclient.search({
       index: 'videos-list',
       type: 'videos',
-      q: "Julie"
+      body: {
+        query: {
+          "match_all": {}
+        }
+      }
     })
     .then( body => {
       var hits = body.hits.hits;
       console.log('body', hits)
 
-      res.json(hits)
+      res.send(hits)
     },
     (err) => {
       console.log('error searching', err);
     });
-    // res.status(200).send(log)
+
 })
 
 app.listen(3030, (err) => {
