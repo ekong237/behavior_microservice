@@ -24,7 +24,7 @@ let categories = ['Auto & Vehicles',
 ];
 let randomIndex = Math.floor(Math.random() * 19)
 
-function createVideoList(n) {
+function getRandomList(n) {
   let videoList = [];
   for (let i = 1; i <= n; i++) {
     let eachVideo = {};
@@ -41,13 +41,18 @@ function createVideoList(n) {
     eachVideo.likes = faker.random.number(50000);
     eachVideo.dislikes = faker.random.number(10000);
     eachVideo.recommended = false;
-    eachVideo.actions = {};
+    eachVideo.actions = {
+      selected: 0,
+      search: []
+    };
 
     videoList.push(eachVideo);
   }
   return videoList;
 }
 
-console.log('videoList', createVideoList(5));
+// console.log('random videoList', getRandomList(5));
 
-module.exports = createVideoList;
+module.exports = {
+  getRandomList
+}

@@ -37,3 +37,5 @@ node_modules/
 bower_components/
 elasticsearch-5.6.3/
 Faker.js-master/
+logstash-5.6.3/
+kibana-5.6.3-darwin-x86_64

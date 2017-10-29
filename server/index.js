@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var ESclient = require('../elasticsearch/elasticsearch.js');
+var db = require('../database/index.js')
 var app = express();
 
 
@@ -9,7 +10,7 @@ var app = express();
 // app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', function(req, res){
-
+  db.getClicks();
   ESclient.cluster.health(function (err, resp) {
     if (err) {
       console.error(err.message);
@@ -82,7 +83,30 @@ app.post('/videos', (req, res) => {
 //   }
 // });
 
+app.get('/clicks', (req, res) => {
+  ESclient.indices.create({
+    index: 'clicks',
+    type: 'videos',
+    "mappings" : {
+
+      "properties" : {
+       "selected" : {"type": "integer", "index" : "not_analyzed" },
+       "categories" : {"type": "string", "index" : "not_analyzed" },
+       "recommended" : { "type" : "boolean" },
+       "createdAt" : { "type" : "date" }
+      }
+
+    }
+  })
+
+  db.getClicks( result => {
+    // console.log('RESULT:', result);
+    res.json(result)
+  })
+});
+
 app.get('/videos', (req, res) => {
+
   ESclient.search({
       index: 'videos-list',
       type: 'videos',
@@ -104,9 +128,9 @@ app.get('/videos', (req, res) => {
 
 })
 
-app.listen(3030, (err) => {
+app.listen(8080, (err) => {
   if (err) { console.log(err); }
-  console.log('node server listening on 3030!');
+  console.log('node server listening on 8080!');
 });
 
 //chance library to create 

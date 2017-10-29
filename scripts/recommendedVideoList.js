@@ -22,13 +22,13 @@ let categories = ['Auto & Vehicles',
                   'Sports',
                   'Travel & Events'
 ];
-let randomIndex = Math.floor(Math.random() * 19);
+let randomIndex = Math.floor(Math.random() * 18);
 
 
 let date = faker.date.recent();
-console.log('date>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', date);
 
-function recommendedVideoList(n) {
+
+function getRecommendedList(n) {
   let videoList = [];
   for (let i = 1; i <= n; i++) {
     let eachVideo = {};
@@ -45,15 +45,20 @@ function recommendedVideoList(n) {
     eachVideo.likes = faker.random.number(50000);
     eachVideo.dislikes = faker.random.number(10000);
     eachVideo.recommended = true;
-    eachVideo.actions = {};
+    eachVideo.actions = {
+      selected: 0,
+      search: []
+    };
 
     videoList.push(eachVideo);
   }
   return videoList;
 }
 
-console.log('videoList', recommendedVideoList(5));
+// console.log('recommend videoList', getRecommendedList(5));
 
-module.exports = recommendedVideoList;
+module.exports = {
+  getRecommendedList
+};
 
 
