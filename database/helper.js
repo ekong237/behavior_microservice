@@ -4,8 +4,8 @@ const db = require('../database/index.js');
 const db.sequelize = sequelize;
 
 let getClicks = function() {
-  let queryString = 
-  sequelize.query()
+  // let queryString = 
+  // sequelize.query()
 }
 
 module.exports = {

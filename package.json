@@ -17,19 +17,25 @@
     "webpack": "^2.2.1"
   },
   "dependencies": {
+    "aws-sdk": "^2.142.0",
+    "axios": "^0.17.0",
     "body-parser": "^1.17.2",
     "chance": "^1.0.11",
     "elasticsearch": "^13.3.1",
     "express": "^4.15.0",
     "faker": "^4.1.0",
     "jquery": "^3.1.1",
+    "moment": "^2.19.1",
     "mysql": "^2.13.0",
     "pg": "^7.3.0",
+    "pm2": "^2.7.2",
+    "powerthesaurus-api": "^1.0.1",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "request": "^2.82.0",
     "sentence-generator": "^1.0.1",
     "sequelize": "^4.19.0",
+    "sqs-consumer": "^3.8.0",
     "url": "^0.11.0"
   }
 }

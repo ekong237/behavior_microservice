@@ -2,6 +2,7 @@ const faker = require('faker');
 const Gen = require('sentence-generator');
 const text = Gen('./content.txt');
 const db = require('../database');
+const user = require('./user');
 
 let categories = [
     'Auto & Vehicles',
@@ -23,10 +24,14 @@ let categories = [
     'Sports',
     'Travel & Events'
 ];
+
 let randomIndex = Math.floor(Math.random() * 18);
-// console.log('category: ', categories[faker.random.number({min:0, max:17})]);
 
 let date = faker.date.recent();
+
+/************************
+  CREATE DATA OBJECTS
+************************/ 
 
 let createVideo = function() {
   let result = {};
@@ -39,10 +44,32 @@ let createVideo = function() {
   result.recommended = faker.random.boolean();
   return result;
 }
-// console.log(createVideo());
+// console.log('created video:', createVideo);
 
+let createAction = function() {
+  let result = {};
+  let randomAction = ['selected', 'search'];
+  let selectAction = randomAction[faker.random.number({min:0, max:1})]
+  // console.log('select action:', selectAction);
+  result.selected = null;
+  result.search = null;
 
-let genVideo = function() {
+  if (selectAction === 'selected') {
+    let maxVideoCreatedId = 15454706;
+    result.selected = faker.random.number(maxVideoCreatedId);
+  } else {
+    let randomTerms = text.take(1).split(' ').slice(0,2).join(' ');
+    result.search = randomTerms;
+  }
+  return result;
+}
+// console.log('created action:', createAction());
+
+/******************************
+  GENERATE DATA INTO DATABASE
+*******************************/ 
+
+let bulkAddVideo = function() {
   let promises = [];
   for (var i = 0; i < 1000; i++) {
     let newVid = createVideo();
@@ -53,74 +80,55 @@ let genVideo = function() {
       console.log('done generating video');
     })
 };
-// genVideo();
-// console.log(genVideo());
+// console.log('generated video:', genVideo());
 
-let createAction = function(maxCreated) {
-  let result = {};
-  let randomAction = ['selected', 'search'];
-  let selectAction = randomAction[faker.random.number({min:0, max:1})]
-  // console.log('select action:', selectAction);
-  result.selected = null;
-  result.search = null;
-
-  if (selectAction === 'selected') {
-    result.selected = faker.random.number(maxCreated);
-  } else {
-    let randomTerms = text.take(1).split(' ').slice(0,2).join(' ');
-    result.search = randomTerms;
-  }
-  return result;
-}
-console.log('created action:', createAction());
-
-let genAction = function() {
-  let promises = [];
-  for (var i = 0; i < 1000; i++) {
-    let newAction = createAction(i);
-    promises.push(db.addAction(newAction));
-  }
-  return Promise.all(promises)
-    .then( (insert) => {
-      console.log('done generating actions', insert);
+let bulkAddAction = function(arrOfActions) {
+  db.Action.bulkCreate(arrOfActions)
+    .then(inserted => {
+      console.log('done generating actions', inserted);
+    })
+    .catch(err => {
+      console.log(err);
     })
 }
-// genAction();
 // console.log('generated action', genAction());
-// setInterval(genAction,1000);
-setInterval(genVideo, 1000)
 
-
-
-
-
-
-
-
-// let createActionOnVid = function() {
-//   let actionId = 
-//   // actionId, videoId
-//   let result = {};
-//   result.action_id = actionId;
-//   result.video_id = videoId;
-//   result.createdAt = date;
-//   return result;
+let bulkAddUser = function() {
+  let arrOfUsers = [];
+  for (var i = 0; i < 10000; i++) {
+    let newUser = user.createUser();
+    arrOfUsers.push(newUser);
+  }
+  db.User.bulkCreate(arrOfUsers)
+    .then(inserted => {
+      console.log('done generating users', inserted);
+    })
+    .catch(err => {
+      console.log(err);
+    })
+}
+// let addUsers = function(arrOfUserObjs) {
+//   return User.bulkCreate(arrOfUserObjs);
+//   // return User.create(userObj);
 // }
 
-// let genActionOnVid = function() {
-//   let result = {};
-//   let randomAction = ['selected', 'search'];
-//   let randomIndex = Math.floor(Math.random() * 2);
-//   var selectAction = randomAction[randomIndex];
-//   let promises = [];
-//   for (var i = 0; i < 10; i++) {
-//     let newActionOnVid = createActionOnVid();
-//     promises.push(db.addActionOnVideo(newActionOnVid));
-//   }
-//   return Promise.all(promises)
-//     .then( (insert) => {
-//       console.log('done generating actionOnVid', insert);
-//   })
+// let addVideo = function(videoObj) {
+//   return Video.create(videoObj);
 // }
-// genActionOnVid();
+
+// let addAction = function(arrOfActionObjs) {
+//   return Action.bulkCreate(arrOfActionObjs);
+// }
+
+
+
+// console.log('generated user:', genUser());
+
+// setInterval(bulkAddAction,1000);
+// setInterval(bulkAddVideo, 1000);
+// setInterval(bulkAddUser, 1000);
+
+
+
+
 

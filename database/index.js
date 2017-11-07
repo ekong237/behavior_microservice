@@ -1,7 +1,14 @@
+
 let Sequelize = require('sequelize');
 let sequelize = new Sequelize('irecyou', '', '', {
   host: 'localhost',
   dialect: 'postgres',
+  logging: false,
+  pool: {
+    idle: 20000,
+    acquire: 20000,
+    handleDisconnects: true
+  }
 });
 
 sequelize
@@ -14,8 +21,20 @@ sequelize
     console.error('Unable to connect to the database:', err);
 });
 
-let Video = sequelize.define('video', {
+/************
+    MODELS  
+*************/
 
+let User = sequelize.define('user', {
+  preference1: { type: Sequelize.STRING },
+  preference2: { type: Sequelize.STRING },
+  preference3: { type: Sequelize.STRING },
+  preference4: { type: Sequelize.STRING },
+  preference5: { type: Sequelize.STRING },
+  location: { type: Sequelize.STRING }
+});
+
+let Video = sequelize.define('video', {
   title: { type: Sequelize.STRING },
   publisher: { type: Sequelize.STRING },
   categories: { type: Sequelize.STRING },
@@ -25,46 +44,87 @@ let Video = sequelize.define('video', {
   recommended: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: false },
 });
 
+// { user_id: 51109,
+//   select: 'Science & Technology',
+//   search: null,
+//   location: 'CA' }
+
+  // id: { 
+  //   type:Sequelize.INTEGER, 
+  //   primaryKey: true, 
+  //   autoIncrement: true
+  // },
+
 let Action = sequelize.define('action', {
-  id: { type:Sequelize.INTEGER, primaryKey: true, autoIncrement: true},
-  selected: { 
-    type: Sequelize.INTEGER, 
+  userid: {
+    type: Sequelize.INTEGER,
     references: {
-      model: Video,
+      model: User,
       key: "id"
-    },
-    defaultValue: null 
+    }
   },
-  search: { type: Sequelize.STRING, defaultValue: null }
+  select: { type: Sequelize.INTEGER, defaultValue: null },
+  search: { type: Sequelize.STRING, defaultValue: null },
+  location: { type: Sequelize.STRING }
 });
 
-// let ActionOnVideo = sequelize.define('action_on_video', {
-//   video_id: {
-//     type: Sequelize.INTEGER,
-//     references: {
-//       model: Video,
-//       key: "id"
-//     }
-//   },
-//   action_id: {
-//     type: Sequelize.INTEGER,
-//     references: {
-//       model: Action,
-//       key: "id"
-//     }
-//   }
-// });
+/***********
+   METHODS  
+************/
+let user = require('../data/user');
 
-let addVideo = function(videoObj) {
-  return Video.create(videoObj);
+let bulkAddVideo = function() {
+  let promises = [];
+  for (var i = 0; i < 1000; i++) {
+    let newVid = createVideo();
+    promises.push(db.addVideo(newVid));
+  }
+  return Promise.all(promises)
+    .then( (insert) => {
+      console.log('done generating video');
+    })
+};
+// console.log('generated video:', genVideo());
+
+let bulkAddAction = function(arrOfActions) {
+  Action.bulkCreate(arrOfActions)
+    .then(inserted => {
+      console.log('done generating actions', inserted);
+    })
+    .catch(err => {
+      console.log(err);
+    })
+}
+// console.log('generated action', genAction());
+
+let bulkAddUser = function() {
+  let arrOfUsers = [];
+  for (var i = 0; i < 10000; i++) {
+    let newUser = user.createUser();
+    arrOfUsers.push(newUser);
+  }
+  User.bulkCreate(arrOfUsers)
+    .then(inserted => {
+      console.log('done generating users', inserted);
+    })
+    .catch(err => {
+      console.log(err);
+    })
 }
 
-let addAction = function(actionObj) {
-  return Action.create(actionObj);
+// let addAction = async function(promise) {
+//   let actionObj = await promise;
+//   return Action.create(actionObj);
+// }
+
+let getUser = function(id) {
+  let queryString = `select * from users where users.id = ${id}`;
+  return sequelize.query(queryString)
+    
 }
 
 let getClicks = function(callback) {
-  var queryString = `select actions.selected, videos.categories, videos.recommended, actions."createdAt" from actions join videos on actions.selected = videos.id ORDER BY actions."createdAt" limit 5000;`; 
+  let queryString = `select actions.selected, videos.categories, videos.recommended, actions."createdAt" from actions join videos on actions.selected = videos.id ORDER BY actions."createdAt" limit 5000;`; 
   sequelize.query(queryString)
     .then((results) => {
         console.log(results);
@@ -80,10 +140,12 @@ let getClicks = function(callback) {
 // }
 
 module.exports = {
-
+  User,
   Video,
   Action,
-  addVideo,
-  addAction,
+  bulkAddUser,
+  bulkAddVideo,
+  bulkAddAction,
+  getUser,
   getClicks
 }
